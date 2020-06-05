@@ -60,6 +60,6 @@ workflows:
       - upload_toxicity_model
       - test_ml_api:
           requires:
-            - train_and_upload_toxicity_model
+            - upload_toxicity_model
 
 
