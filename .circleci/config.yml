@@ -29,6 +29,7 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install -r packages/ml_api/requirements.txt
+            PYTHONPATH=. python3 ./download_data.py
             py.test -vv packages/ml_api/tests
 
   upload_toxicity_model:
