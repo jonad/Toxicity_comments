@@ -31,7 +31,7 @@ jobs:
             pip install -r packages/ml_api/requirements.txt
             py.test -vv packages/ml_api/tests
 
-  train_and_upload_toxicity_model:
+  upload_toxicity_model:
     working_directory: ~/project
     docker:
       - image: circleci/python:3.7.2
@@ -49,7 +49,6 @@ jobs:
             . venv/bin/activate
             chmod +x ./scripts/publish_model.sh
             PYTHONPATH=. python3 ./download_data.py
-            PYTHONPATH=./packages/toxicity_model python3 packages/toxicity_model/toxicity_model/train_model.py
             ./scripts/publish_model.sh ./packages/toxicity_model/
 
 workflows:
@@ -58,7 +57,7 @@ workflows:
     jobs:
       - test_toxicity_model
       - test_ml_api
-      - train_and_upload_toxicity_model
+      - upload_toxicity_model
       - test_ml_api:
           requires:
             - train_and_upload_toxicity_model
