@@ -20,7 +20,7 @@ def test_prediction_end_point_return_prediction(flask_test_client):
     # Given
     
     
-    test_data = load_dataset(filename=config.TESTING_API_DATA_FILE)
+    test_data = load_dataset(filename=config.TESTING_DATA_FILE)
     post_json = test_data[0:1].to_json(orient='records')
     
     #When
