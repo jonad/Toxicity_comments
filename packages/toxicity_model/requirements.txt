@@ -69,3 +69,9 @@ virtualenv==20.0.21
 Werkzeug==1.0.1
 wrapt==1.12.1
 zipp==3.1.0
+# packaging
+setuptools==40.6.3
+wheel==0.32.3
+
+# testing requirements
+pytest==4.0.2
