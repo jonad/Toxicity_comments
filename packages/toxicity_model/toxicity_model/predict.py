@@ -27,7 +27,7 @@ def make_prediction(*, input_data):
     
     with open(os.path.join(config.EMBEDDING_DIR, config.GLOVE_EMBEDDING_MODEL_FILE), 'rb') as handle:
         embeddings = pickle.load(handle)
-        # read validation data
+    # read validation data
     x_test = tokenizer.texts_to_sequences(test_data[config.TEXT])
     x_test = sequence.pad_sequences(x_test, maxlen=config.MAX_LEN)
     # 3 - call the evaluate function
