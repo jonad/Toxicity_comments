@@ -13,7 +13,7 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install -r packages/toxicity_model/requirements.txt
-            python download_data.py
+            PYTHONPATH=./packages/toxicity_model python3 ./download_data.py
             py.test -vv packages/toxicity_model/tests
 
 workflows:
