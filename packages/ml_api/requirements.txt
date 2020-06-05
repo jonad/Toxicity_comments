@@ -6,4 +6,4 @@ marshmallow=2.17.0
 
 # local regression_model package
 # update with your local path
--e "/Users/jonad/Documents/porfolios_projects/toxicity_comments/packages/toxicity_model"
+toxicity-model==0.1.0
