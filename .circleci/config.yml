@@ -1,27 +1,51 @@
 version: 2
+
+defaults: &defaults
+  docker:
+    - image: circleci/python:3.7.2
+  working_directory: ~/project
+
+prepare_venv: &prepare_venv
+  run:
+    name: Create venv
+    command: |
+      python3 -m venv venv
+      source venv/bin/activate
+      pip install --upgrade pip
+
+fetch_data: &fetch_data
+  run:
+    name: Set script permissions and fetch data
+    command: |
+      source venv/bin/activate
+      PYTHONPATH=. python3 ./download_data.py
+
 jobs:
-  test_toxicity_model:
-    working_directory: ~/project
-    docker:
-      - image: circleci/python:3.7.2
+  test_regression_model:
+    <<: *defaults
     steps:
       - checkout
+      - *prepare_venv
       - run:
-          name: Runnning tests
+          name: Install requirements
           command: |
-            virtualenv venv
             . venv/bin/activate
-            pip install --upgrade pip
             pip install -r packages/toxicity_model/requirements.txt
-            PYTHONPATH=. python3 ./download_data.py
-            PYTHONPATH=./packages/toxicity_model py.test -vv packages/toxicity_model/tests
+      - *fetch_data
+
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            py.test -vv packages/toxicity_model/tests
 
   test_ml_api:
-    working_directory: ~/project
-    docker:
-      - image: circleci/python:3.7.2
+    <<: *defaults
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - py-deps-{{ checksum "packages/ml_api/requirements.txt" }}
       - run:
           name: Runnning tests
           command: |
@@ -29,27 +53,28 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install -r packages/ml_api/requirements.txt
-            PYTHONPATH=. python3 ./download_data.py
             py.test -vv packages/ml_api/tests
+      - save_cache:
+          key: py-deps-{{ checksum "packages/ml_api/requirements.txt" }}
+          paths:
+            - "/venv"
 
   upload_toxicity_model:
-    working_directory: ~/project
-    docker:
-      - image: circleci/python:3.7.2
+    <<: *defaults
     steps:
       - checkout
+      - *prepare_venv
       - run:
-          name: Setup env
+          name: Install requirements
           command: |
-            virtualenv venv
             . venv/bin/activate
             pip install -r packages/toxicity_model/requirements.txt
+      - *fetch_data
       - run:
-          name: Publish model
+          name: Publish model to Gemfury
           command: |
             . venv/bin/activate
             chmod +x ./scripts/publish_model.sh
-            PYTHONPATH=. python3 ./download_data.py
             ./scripts/publish_model.sh ./packages/toxicity_model/
 
 workflows:
@@ -58,9 +83,11 @@ workflows:
     jobs:
       - test_toxicity_model
       - test_ml_api
-      - upload_toxicity_model
-      - test_ml_api:
+      - train_and_upload_toxicity_model:
           requires:
-            - upload_toxicity_model
-
-
+            - test_toxicity_model
+            - test_ml_api
+          # filters:
+          #   branches:
+          #     only:
+          #       - master
