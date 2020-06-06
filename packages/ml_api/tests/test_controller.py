@@ -16,32 +16,32 @@ def test_health_endpoint_returns_200(flask_test_client):
     # Then
     assert response.status_code == 200
     
-def test_prediction_end_point_return_prediction(flask_test_client):
-    # Given
-    
-    
-    test_data = load_dataset(filename=config.TESTING_DATA_FILE)
-    post_json = test_data[0:1].to_json(orient='records')
-    
-    #When
-    response = flask_test_client.post('/v1/predict/toxicity',
-                                      json=post_json)
-    
-    #Then
-    assert response.status_code == 200
-    response_json = json.loads(response.data)
-    predictions = response_json['predictions']
-    response_version = response_json['version']
-    dict_keys = list(predictions.keys())
-    lstm_predictions = predictions['lstm']
-    bilstm_predictions = predictions['bilstm']
-    attention_predictions = predictions['attentionnet']
-    
-    assert set(dict_keys) == set(['lstm', 'bilstm', 'attentionnet'])
-    assert all(x >= 0.0 and x <= 1.0 for x in lstm_predictions)
-    assert all(x >= 0.0 and x <= 1.0 for x in bilstm_predictions)
-    assert all(x >= 0.0 and x <= 1.0 for x in attention_predictions)
-    assert response_version == _version
+# def test_prediction_end_point_return_prediction(flask_test_client):
+#     # Given
+#
+#
+#     test_data = load_dataset(filename=config.TESTING_DATA_FILE)
+#     post_json = test_data[0:1].to_json(orient='records')
+#
+#     #When
+#     response = flask_test_client.post('/v1/predict/toxicity',
+#                                       json=post_json)
+#
+#     #Then
+#     assert response.status_code == 200
+#     response_json = json.loads(response.data)
+#     predictions = response_json['predictions']
+#     response_version = response_json['version']
+#     dict_keys = list(predictions.keys())
+#     lstm_predictions = predictions['lstm']
+#     bilstm_predictions = predictions['bilstm']
+#     attention_predictions = predictions['attentionnet']
+#
+#     assert set(dict_keys) == set(['lstm', 'bilstm', 'attentionnet'])
+#     assert all(x >= 0.0 and x <= 1.0 for x in lstm_predictions)
+#     assert all(x >= 0.0 and x <= 1.0 for x in bilstm_predictions)
+#     assert all(x >= 0.0 and x <= 1.0 for x in attention_predictions)
+#     assert response_version == _version
     
 def test_version_endpoint_returns_version(flask_test_client):
     # When
