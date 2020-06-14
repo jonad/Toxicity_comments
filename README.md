@@ -1,10 +1,10 @@
 # Recurrent Neural Network for sentence-level Text Classification
 
-This project is about building and evaluating recurrent neural network models<br >
-for sentence-level text classification. The final models detect toxicity in <br >
-short texts as well as the type of toxicity, which include the following <br >
-categories: severe toxicity, obscene, identity attack, insult, and threat. <br >
-The final models can be used for filtering online posts and comments,<br>
+This project is about building and evaluating recurrent neural network models
+for sentence-level text classification. The final models detect toxicity in
+short texts as well as the type of toxicity, which include the following
+categories: severe toxicity, obscene, identity attack, insult, and threat.
+The final models can be used for filtering online posts and comments,
 social media policing, and user education.
 <br>
 ### Links
