@@ -130,6 +130,17 @@ packages/toxicity_model/toxicity_model/trained_models/*.pt
 packages/toxicity_model/toxicity_model/ec2_model/*.pt
 packages/toxicity_model/toxicity_model.egg-info
 
+.DS_Store
+packages/.DS_Store
+packages/toxicity_model/.DS_Store
+packages/toxicity_model/toxicity_model/.DS_Store
+packages/toxicity_model/toxicity_model/datasets/.DS_Store
+packages/toxicity_model/toxicity_model/ec2_model/.DS_Store
+packages/toxicity_model/toxicity_model/embeddings/.DS_Store
+packages/toxicity_model/toxicity_model/tokenizers/.DS_Store
+packages/toxicity_model/toxicity_model/trained_models/.DS_Store
+
+
 
 
 
