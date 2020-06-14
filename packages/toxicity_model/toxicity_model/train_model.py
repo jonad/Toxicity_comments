@@ -17,8 +17,7 @@ from toxicity_model import __version__ as _version
 _logger = logging_config.get_logger('__name__')
 
 
-def train_model(model, train, test, model_file, model_name,   loss_fn, output_dim, lr=0.001, batch_size=512, n_epochs=10,
-                enable_checkpoint_ensemble=False):
+def train_model(model, train, test, model_file, model_name, loss_fn, lr=0.001, batch_size=512, n_epochs=10):
     param_lrs = [{'params': param, 'lr': lr} for param in model.parameters()]
     optimizer = torch.optim.Adam(param_lrs, lr=lr)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda epoch: 0.6 ** epoch)
@@ -26,9 +25,8 @@ def train_model(model, train, test, model_file, model_name,   loss_fn, output_di
     test_loader = torch.utils.data.DataLoader(test, batch_size=batch_size, shuffle=False)
     training_loss = []
     validation_loss = []
-    avg_val_loss = 0
+    
     best_loss = float("inf")
-    checkpoint_weights = [2 ** epoch for epoch in range(n_epochs)]
     for epoch in range(n_epochs):
         start_time = time.time()
         
@@ -41,12 +39,14 @@ def train_model(model, train, test, model_file, model_name,   loss_fn, output_di
             if model_name != 'attention':
                 y_pred = model(*x_batch)
             else:
-                y_pred, _ = model(*x_batch)
+                
+                y_pred, _ = model(*x_batch, config.MAX_LEN)
             loss = loss_fn(y_pred, y_batch)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             avg_loss += loss.item() / len(train_loader)
+            
         training_loss.append(avg_loss)
         model.eval()
         _logger.info(f'... Validating {model_name} ... ')
@@ -57,19 +57,17 @@ def train_model(model, train, test, model_file, model_name,   loss_fn, output_di
             if model_name != 'attention':
                 y_pred = model(*x_batch)
             else:
-                y_pred, _ = model(*x_batch)
+                y_pred, _ = model(*x_batch, config.MAXLEN)
             
             val_loss = loss_fn(y_pred, y_batch)
             avg_val_loss += val_loss.item() / len(test_loader)
-            # y_pred = sigmoid(model(*x_batch).detach().cpu().numpy())
         
         elapsed_time = time.time() - start_time
         validation_loss.append(avg_val_loss)
         if avg_val_loss < best_loss:
             _logger.info('saving the best model so far')
-            
-            torch.save(model.state_dict(), model_file)
             best_loss = avg_val_loss
+            torch.save(model.state_dict(), model_file)
         _logger.info(
             f'Epoch {epoch + 1}/{n_epochs}\t training_loss={avg_loss:.4f} \t validation_loss={avg_val_loss: 4f} \t time={elapsed_time:.2f}s')
         scheduler.step()
@@ -81,8 +79,8 @@ def train(model_name):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     # read the train data
-    train = pd.read_csv(os.path.join(config.DATASETS_DIR, config.TRAINING_DATA_FILE))
-    validation = pd.read_csv(os.path.join(config.DATASETS_DIR, config.VALIDATION_DATA_FILE))
+    train = pd.read_csv(os.path.join(config.DATASETS_DIR, config.TRAINING_DATA_FILE), keep_default_na=False)
+    validation = pd.read_csv(os.path.join(config.DATASETS_DIR, config.VALIDATION_DATA_FILE), keep_default_na=False)
     
     # compute weights
     loss_weights, training_weights = utils.compute_weights(train)
@@ -124,7 +122,7 @@ def train(model_name):
         model_file = os.path.join(config.TRAINED_MODEL_DIR, f'state_dict_bilstm{_version}.pt')
     elif model_name == 'attention':
         model = attention.AttentionNet(embeddings)
-        model_file = os.path.join(config.TRAINED_MODEL_DIR, f'state_dict_attention{_version}.pt')
+        model_file = os.path.join(config.TRAINED_MODEL_DIR, f'state_dict_attention.pt')
     model.to(device)
     
     def custom_loss(data, targets):
@@ -133,17 +131,20 @@ def train(model_name):
         bce_loss_2 = nn.BCEWithLogitsLoss()(data[:, 1:], targets[:, 2:])
         return (bce_loss_1 * loss_weights) + bce_loss_2
     
-    training_loss, validation_loss = train_model(model, train_dataset, val_dataset, model_file, model_name, output_dim=y_train_torch.shape[-1],
-                                                 n_epochs=1,
-                                                 loss_fn=custom_loss)
+    training_loss, validation_loss = train_model(model, train_dataset, val_dataset, model_file, model_name,
+                                                 n_epochs=1,loss_fn=custom_loss)
+    
     
     return training_loss, validation_loss
     
    
 
 if __name__ == '__main__':
-    models = ['lstm', 'bilstm', 'attention']
+    models = ['attention']
     for model_name in models:
         _logger.info(f'.... Training .... {model_name}')
-        train(model_name)
+        
+        training_loss, validation_loss = train(model_name)
+        df = pd.DataFrame({'training_loss': training_loss, 'validation_loss':validation_loss})
+        df.to_csv(model_name + '.csv')
     _logger.info('Training ended')

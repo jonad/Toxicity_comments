@@ -2,14 +2,14 @@ import pathlib
 
 import toxicity_model
 PACKAGE_ROOT = pathlib.Path(toxicity_model.__file__).resolve().parent
-TRAINED_MODEL_DIR = PACKAGE_ROOT / "trained_models"
+TRAINED_MODEL_DIR = PACKAGE_ROOT / "ec2_model"
 DATASETS_DIR = PACKAGE_ROOT / 'datasets'
 
 # embeddings
 EMBEDDING_URL = "http://nlp.stanford.edu/data/glove.6B.zip"
 EMBEDDING_DIR = PACKAGE_ROOT / 'embeddings'
-GLOVE_EMBEDDING_FILE = 'glove.6B.50d.txt'
-WORD2VEC_GLOVE_EMBEDDING_FILE = 'glove.6B.50d.word2vec.txt'
+GLOVE_EMBEDDING_FILE = 'glove.840B.300d.txt'
+WORD2VEC_GLOVE_EMBEDDING_FILE = 'glove.840B.300d.word2vec.txt'
 GLOVE_EMBEDDING_MODEL_FILE = 'glove_embeddings.pkl'
 
 # tokenizer
@@ -18,7 +18,7 @@ TOKENIZER_FILE = 'tokenizer.pkl'
 
 # data
 DATA_FILE = 'toxic_comments.csv'
-TESTING_DATA_FILE = 'test.csv'
+TESTING_DATA_FILE = 'final_testing.csv'
 TRAINING_DATA_FILE = 'train.csv'
 VALIDATION_DATA_FILE = 'validation.csv'
 PROCESSED_DATA_FILE = 'processed_train.csv'
@@ -80,8 +80,8 @@ REMOVE_DICT = {ord(c):f'' for c in SYMBOLS_TO_DELETE}
 
 OOV_TOKEN = 'UNK'
 NUM_WORDS = 500000
-EMBEDDING_SIZE = 50
-MAX_FEATURES = 500000
+EMBEDDING_SIZE = 300
+MAX_FEATURES = 50000
 LSTM_UNITS = 128
 NUM_MODELS = 2
 DENSE_HIDDEN_UNITS = 4*LSTM_UNITS

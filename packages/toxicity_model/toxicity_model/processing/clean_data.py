@@ -52,7 +52,7 @@ def preprocess(x):
     return x
 
 def load_dataset(*, filename: str) -> pd.DataFrame:
-    _data = pd.read_csv(f'{config.DATASETS_DIR}/{filename}')
+    _data = pd.read_csv(f'{config.DATASETS_DIR}/{filename}', keep_default_na=False)
     return _data
 
 def clean_data():

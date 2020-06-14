@@ -26,7 +26,7 @@ jobs:
     steps:
       - checkout
       - *prepare_venv
-      - run:
+      - run:-m
           name: Install requirements
           command: |
             . venv/bin/activate
@@ -87,7 +87,7 @@ workflows:
           requires:
             - test_toxicity_model
             - test_ml_api
-          # filters:
-          #   branches:
-          #     only:
-          #       - master
+          filters:
+            branches:
+              only:
+                - master

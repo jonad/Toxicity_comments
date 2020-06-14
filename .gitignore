@@ -127,6 +127,7 @@ packages/toxicity_model/toxicity_model/tokenizers/*.txt
 .pytest_cache
 packages/toxicity_model/toxicity_model/logs
 packages/toxicity_model/toxicity_model/trained_models/*.pt
+packages/toxicity_model/toxicity_model/ec2_model/*.pt
 packages/toxicity_model/toxicity_model.egg-info
 
 

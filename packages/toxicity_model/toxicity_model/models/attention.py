@@ -6,33 +6,22 @@ import torch.nn.functional as F
 
 
 class Attention(nn.Module):
-    def __init__(self, feature_dim, step_dim, bias=True, **kwargs):
+    def __init__(self, feature_dim, **kwargs):
         super(Attention, self).__init__(**kwargs)
         
         self.supports_masking = True
-        
-        self.bias = bias
         self.feature_dim = feature_dim
-        self.step_dim = step_dim
-        
         weight = torch.zeros(feature_dim, 1)
         nn.init.xavier_uniform_(weight)
         self.weight = nn.Parameter(weight)
-        
-        if bias:
-            self.b = nn.Parameter(torch.zeros(step_dim))
     
-    def forward(self, x, mask=None):
+    def forward(self, x, step_dim, mask=None):
         feature_dim = self.feature_dim
-        step_dim = self.step_dim
-        
         eij = torch.mm(
             x.contiguous().view(-1, feature_dim), self.weight
         ).view(-1, step_dim)
-        
         eij = torch.tanh(eij)
         a = torch.exp(eij)
-        
         if mask is not None:
             a = a * mask
         a = a / torch.sum(a, 1, keepdim=True) + 1e-10
@@ -54,7 +43,7 @@ class AttentionNet(nn.Module):
         
         self.lstm2 = nn.LSTM(config.LSTM_UNITS * 2, config.LSTM_UNITS, bidirectional=True, batch_first=True)
         
-        self.lstm_attention = Attention(config.LSTM_UNITS * 2, config.MAX_LEN)
+        self.lstm_attention = Attention(config.LSTM_UNITS * 2)
         
         self.linear1 = nn.Linear(768, 768)
         self.linear2 = nn.Linear(768, 768)
@@ -62,15 +51,14 @@ class AttentionNet(nn.Module):
         self.linear_out = nn.Linear(768, 1)
         self.linear_aux_out = nn.Linear(768, config.NUM_AUX_TARGETS)
     
-    def forward(self, x):
+    def forward(self, x, step_len):
         h_embedding = self.embedding(x)
         h_embedding = self.embedding_dropout(h_embedding)
         h_lstm1, _ = self.lstm1(h_embedding)
         h_lstm2, _ = self.lstm2(h_lstm1)
         
-        h_lstm_atten, weights = self.lstm_attention(h_lstm2)
-        
-        # Attention layer
+        #Attention layer
+        h_lstm_atten, weights = self.lstm_attention(h_lstm2, step_len)
         
         # global average pooling
         avg_pool = torch.mean(h_lstm2, 1)
@@ -87,9 +75,6 @@ class AttentionNet(nn.Module):
         out = torch.cat([result, aux_result], 1)
         return out, weights
 
-
-if __name__ == '__main__':
-    pass
 
 
 

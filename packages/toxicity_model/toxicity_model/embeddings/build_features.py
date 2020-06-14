@@ -16,6 +16,8 @@ def build_matrix(word_index, embedding_index):
             embedding_matrix[i] = embedding_index[word]
         except KeyError:
             unknown_words.append(word)
+        except:
+            pass
     return embedding_matrix, unknown_words
 
 
@@ -29,7 +31,7 @@ def get_glove():
 
 
 def build_embeddings():
-    data = pd.read_csv(os.path.join(config.DATASETS_DIR , config.PROCESSED_DATA_FILE))
+    data = pd.read_csv(os.path.join(config.DATASETS_DIR , config.PROCESSED_DATA_FILE), keep_default_na=False)
     glove_model = get_glove()
     tokenizer = Tokenizer(num_words=500000, filters='', lower=False, oov_token=config.OOV_TOKEN)
     tokenizer.fit_on_texts(list(data[config.TEXT]))
