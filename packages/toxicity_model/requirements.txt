@@ -64,7 +64,7 @@ tox==3.15.1
 tqdm==4.46.1
 typed-ast==1.4.1
 typing-extensions==3.7.4.2
-urllib3==1.25.9
+urllib3==1.26.5
 virtualenv==20.0.21
 Werkzeug==1.0.1
 wrapt==1.12.1
